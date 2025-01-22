@@ -78,22 +78,26 @@ def create_correction_table(detected):
 # 正誤表を使用して修正を適用する関数
 def apply_corrections_with_table(text, correction_df):
     corrections = []
+    total_replacements = 0
     for _, row in correction_df.iterrows():
         incorrect, correct = row.iloc[0], row.iloc[1]
-        if incorrect in text:
+        while incorrect in text:
             corrections.append((incorrect, correct))
             text = text.replace(incorrect, correct, 1)
-    return text, corrections
+            total_replacements += 1
+    return text, corrections, total_replacements
 
 # 利用漢字表を使用して修正を適用する関数
 def apply_kanji_table(text, kanji_df):
     corrections = []
+    total_replacements = 0
     for _, row in kanji_df.iterrows():
         hiragana, kanji = row.iloc[0], row.iloc[1]
-        if hiragana in text:
+        while hiragana in text:
             corrections.append((hiragana, kanji))
             text = text.replace(hiragana, kanji, 1)
-    return text, corrections
+            total_replacements += 1
+    return text, corrections, total_replacements
 
 # Streamlit アプリケーション
 st.markdown("<h1 style='text-align: center;'>南江堂用用語チェッカー（笑）</h1>", unsafe_allow_html=True)
@@ -138,10 +142,10 @@ if word_file and (terms_file or correction_file or kanji_file):
     if correction_file:
         try:
             correction_df = load_excel(correction_file)
-            updated_text, corrections_from_table = apply_corrections_with_table(original_text, correction_df)
+            updated_text, corrections_from_table, total_replacements = apply_corrections_with_table(original_text, correction_df)
             corrections.extend(corrections_from_table)
 
-            st.success(f"正誤表を適用し、{len(corrections_from_table)}件修正しました！")
+            st.success(f"正誤表を適用し、{total_replacements}回の修正を行いました！")
 
             corrections_df = pd.DataFrame(corrections_from_table, columns=["誤った用語", "正しい用語"])
             st.dataframe(corrections_df)
@@ -170,10 +174,10 @@ if word_file and (terms_file or correction_file or kanji_file):
     if kanji_file:
         try:
             kanji_df = load_excel(kanji_file)
-            updated_text, kanji_corrections = apply_kanji_table(original_text, kanji_df)
+            updated_text, kanji_corrections, total_replacements = apply_kanji_table(original_text, kanji_df)
             corrections.extend(kanji_corrections)
 
-            st.success(f"利用漢字表を適用し、{len(kanji_corrections)}件修正しました！")
+            st.success(f"利用漢字表を適用し、{total_replacements}回の修正を行いました！")
 
             kanji_corrections_df = pd.DataFrame(kanji_corrections, columns=["ひらがな", "漢字"])
             st.dataframe(kanji_corrections_df)
