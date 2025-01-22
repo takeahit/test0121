@@ -81,10 +81,14 @@ def apply_corrections_with_table(text, correction_df):
     total_replacements = 0
     for _, row in correction_df.iterrows():
         incorrect, correct = row.iloc[0], row.iloc[1]
-        while incorrect in text:
-            corrections.append((incorrect, correct))
-            text = text.replace(incorrect, correct, 1)
-            total_replacements += 1
+        max_replacements = text.count(incorrect)
+        for _ in range(max_replacements):
+            if incorrect in text:
+                corrections.append((incorrect, correct))
+                text = text.replace(incorrect, correct, 1)
+                total_replacements += 1
+            else:
+                break
     return text, corrections, total_replacements
 
 # 利用漢字表を使用して修正を適用する関数
@@ -93,10 +97,14 @@ def apply_kanji_table(text, kanji_df):
     total_replacements = 0
     for _, row in kanji_df.iterrows():
         hiragana, kanji = row.iloc[0], row.iloc[1]
-        while hiragana in text:
-            corrections.append((hiragana, kanji))
-            text = text.replace(hiragana, kanji, 1)
-            total_replacements += 1
+        max_replacements = text.count(hiragana)
+        for _ in range(max_replacements):
+            if hiragana in text:
+                corrections.append((hiragana, kanji))
+                text = text.replace(hiragana, kanji, 1)
+                total_replacements += 1
+            else:
+                break
     return text, corrections, total_replacements
 
 # Streamlit アプリケーション
@@ -107,6 +115,23 @@ word_file = st.file_uploader("原稿ファイル (Word, DOC, PDF):", type=["docx
 terms_file = st.file_uploader("用語集ファイル (A列に正しい用語を記載したExcel):", type=["xlsx"])
 correction_file = st.file_uploader("正誤表ファイル (A列に誤った用語、B列に正しい用語を記載したExcel):", type=["xlsx"])
 kanji_file = st.file_uploader("利用漢字表ファイル (A列にひらがな、B列に漢字を記載したExcel):", type=["xlsx"])
+
+# アップロードファイルサイズの制限 (10MB以下)
+if word_file and word_file.size > 10 * 1024 * 1024:
+    st.error("原稿ファイルのサイズが大きすぎます（10MB以下にしてください）。")
+    st.stop()
+
+if terms_file and terms_file.size > 5 * 1024 * 1024:
+    st.error("用語集ファイルのサイズが大きすぎます（5MB以下にしてください）。")
+    st.stop()
+
+if correction_file and correction_file.size > 5 * 1024 * 1024:
+    st.error("正誤表ファイルのサイズが大きすぎます（5MB以下にしてください）。")
+    st.stop()
+
+if kanji_file and kanji_file.size > 5 * 1024 * 1024:
+    st.error("利用漢字表ファイルのサイズが大きすぎます（5MB以下にしてください）。")
+    st.stop()
 
 if word_file and (terms_file or correction_file or kanji_file):
     file_type = word_file.name.split(".")[-1]
