@@ -117,19 +117,19 @@ correction_file = st.file_uploader("正誤表ファイル (A列に誤った用�
 kanji_file = st.file_uploader("利用漢字表ファイル (A列にひらがな、B列に漢字を記載したExcel):", type=["xlsx"])
 
 # アップロードファイルサイズの制限 (10MB以下)
-if word_file and word_file.size > 10 * 1024 * 1024:
+if word_file and word_file.size > 100 * 1024 * 1024:
     st.error("原稿ファイルのサイズが大きすぎます（10MB以下にしてください）。")
     st.stop()
 
-if terms_file and terms_file.size > 5 * 1024 * 1024:
+if terms_file and terms_file.size > 50 * 1024 * 1024:
     st.error("用語集ファイルのサイズが大きすぎます（5MB以下にしてください）。")
     st.stop()
 
-if correction_file and correction_file.size > 5 * 1024 * 1024:
+if correction_file and correction_file.size > 50 * 1024 * 1024:
     st.error("正誤表ファイルのサイズが大きすぎます（5MB以下にしてください）。")
     st.stop()
 
-if kanji_file and kanji_file.size > 5 * 1024 * 1024:
+if kanji_file and kanji_file.size > 50 * 1024 * 1024:
     st.error("利用漢字表ファイルのサイズが大きすぎます（5MB以下にしてください）。")
     st.stop()
 
